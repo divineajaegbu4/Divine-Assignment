@@ -16,8 +16,7 @@ const findMax = (arr) => {
     let max = 0;
 
     for (let i = 0; i < arr.length; i++) {
-        // Log each number
-        // console.log(arr[i]);
+       
 
         if(arr[i] > max) {
             max = arr[i];
