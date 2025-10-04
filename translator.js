@@ -17,7 +17,7 @@ if(languageCode === "es") {
 
 console.log(greeting);
 
-console.log("-------------Switch Statements------------");
+console.log("-------------Switch Statement------------");
 
 switch(languageCode) {
     case "es":
