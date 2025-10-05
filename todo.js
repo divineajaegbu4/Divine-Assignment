@@ -3,7 +3,7 @@ const todoList = [
 { id: 2, task: 'Finish Week 4 assignment', completed: true }
 ];
 
-let nextId = 3;
+ let nextId = 3;
 
 const displayTasks = () => {
     let status;
@@ -20,24 +20,27 @@ const displayTasks = () => {
             default:
                 status = `[ ] ${task.task}`;
         }
-
         console.log(status)
     }
 
+  
 }
 
 
 const addTask = (taskText) => {
+   
+   
 
     const newTask = {
-        id: nextId++, // add the old value then increment
+        id: nextId++, 
         task: taskText,
         completed: false
     }
+
  
     todoList.push(newTask);
- 
     console.log(todoList)
+
 }
 
 const markTaskComplete = (taskId) => {
@@ -68,13 +71,18 @@ const markTaskComplete = (taskId) => {
 
 
 
- console.log("--- Initial To-Do List ---");
+console.log("--- Initial To-Do List ---");
 
  displayTasks();
 
 console.log("\n--- Adding New Tasks ---");
 addTask("Clean the kitchen");
+console.log("----------------------")
+
 addTask("Read a chapter of a book");
+
+console.log("----------------------")
+addTask("Go to school");
 displayTasks();
 
 console.log("\n--- Completing a Task ---");
