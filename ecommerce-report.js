@@ -7,13 +7,38 @@ const transactions = [
 ];
 
 
-// The your solution should be returned in this very format:
 
-// {
-//     totalRevenue: 350,
-//     customers: {
-//         c_1: 150,
-//         c_2: 120,
-//         c_3: 80
-//     }
-// }
+
+const report = transactions
+.filter(transaction => transaction.status === "completed")
+.reduce((summary, transaction) => {
+ const totalPrice = transaction.items.reduce((total, product) => {
+
+ return total + product.price * product.quantity
+}, 0)
+
+const totalCustomerIdPrice = transaction.items.reduce((total, product) => {
+  return total + product.price
+}, 0)
+
+
+if (summary.customers[transaction.customerId]) {
+  summary.customers[transaction.customerId] += totalCustomerIdPrice;
+} else {
+  summary.customers[transaction.customerId] = totalCustomerIdPrice;
+}
+
+summary.totalRevenue += totalPrice;
+
+return summary;
+ 
+
+}, {totalRevenue: 0, customers: {}})
+
+
+console.log(report)
+
+
+
+
+
