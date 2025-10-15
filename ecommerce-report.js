@@ -14,18 +14,16 @@ const report = transactions
 .reduce((summary, transaction) => {
  const totalPrice = transaction.items.reduce((total, product) => {
 
- return total + product.price * product.quantity
+ return total + (product.price * product.quantity)
 }, 0)
 
-const totalCustomerIdPrice = transaction.items.reduce((total, product) => {
-  return total + product.price
-}, 0)
+
 
 
 if (summary.customers[transaction.customerId]) {
-  summary.customers[transaction.customerId] += totalCustomerIdPrice;
+  summary.customers[transaction.customerId] += totalPrice;
 } else {
-  summary.customers[transaction.customerId] = totalCustomerIdPrice;
+  summary.customers[transaction.customerId] = totalPrice;
 }
 
 summary.totalRevenue += totalPrice;
