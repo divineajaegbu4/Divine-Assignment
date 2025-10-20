@@ -2,11 +2,13 @@ import axios from "axios"
 
 const getUserTodos = async() => {
     try {
-       const [users, todos] = await Promise.all([
-        await axios.get("https://jsonplaceholder.typicode.com/users").then(res => res.data),
-        await axios.get("https://jsonplaceholder.typicode.com/todos").then(res => res.data)
+       const [usersRes, todosRes] = await Promise.all([
+        await axios.get("https://jsonplaceholder.typicode.com/users"),
+        await axios.get("https://jsonplaceholder.typicode.com/todos")
        ])
 
+     const users = usersRes.data;
+     const todos = todosRes.data;
 
        const getUsers = users.map(user => {
            const userTodos =  todos
