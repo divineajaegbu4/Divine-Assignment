@@ -29,7 +29,7 @@ const getUserTodos = async() => {
     }catch(err) {
        console.log("Error:", err)
     }finally {
-      console.log("Finished!");
+      console.log("Processed Users");
     }
 }
 
