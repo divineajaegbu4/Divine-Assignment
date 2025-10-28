@@ -26,7 +26,12 @@ const processUsers = async() => {
 }
 
 
-console.log(await processUsers())
+const getProcessorUser = async() => {
+    const processedUsers = await processUsers();
+    console.log(processedUsers);
+}
+
+getProcessorUser();
 
 // async function runMockFetchUsers() {
 //     const msg = await mockFetchUsers();
