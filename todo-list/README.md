@@ -110,3 +110,5 @@ deleteTask(2);
 - Submit your completed todo.js file via a Pull Request to your personal assignments repository.
 
 - Follow the professional branching workflow learned in Week 4.
+
+[Back To Home](../README.md)
