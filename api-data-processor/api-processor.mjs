@@ -1,14 +1,30 @@
 import axios from "axios"
 
+
+
+/*
+Use modern function called arrow function
+async...await
+axios
+try...catch...finally
+Promise.all
+map
+filter
+destructuring
+*/
+
 const getUserTodos = async() => {
     try {
-       const [usersRes, todosRes] = await Promise.all([
-        await axios.get("https://jsonplaceholder.typicode.com/users"),
-        await axios.get("https://jsonplaceholder.typicode.com/todos")
-       ])
+      const getPromises = [
+         axios.get("https://jsonplaceholder.typicode.com/users"),
+         axios.get("https://jsonplaceholder.typicode.com/todos")
+       ];
+
+       const [usersRes, todosRes] = await Promise.all(getPromises)
 
      const users = usersRes.data;
      const todos = todosRes.data;
+
 
        const getUsers = users.map(user => {
            const userTodos =  todos
@@ -26,8 +42,8 @@ const getUserTodos = async() => {
        })
 
        console.log(getUsers)
-    }catch(err) {
-       console.log("Error:", err)
+    }catch(error) {
+       console.log("Error:", error)
     }finally {
       console.log("Finished!");
     }
