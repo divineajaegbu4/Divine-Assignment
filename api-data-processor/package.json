@@ -1,0 +1,24 @@
+{
+  "name": "divine-assignment",
+  "version": "1.0.0",
+  "description": "A simple JavaScript project that demonstrates different programming concepts using multiple files.",
+  "main": "api-processor.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kavinoq-Academy/Divine-Assignment.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kavinoq-Academy/Divine-Assignment/issues"
+  },
+  "homepage": "https://github.com/kavinoq-Academy/Divine-Assignment#readme",
+  "dependencies": {
+    "axios": "^1.12.2"
+  }
+}
