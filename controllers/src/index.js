@@ -85,9 +85,9 @@ app.put("/todo/:todoId", (req, res) => {
     return res.status(404).json({message: "Todo not found!"})
   }
 
-  findById.isCompleted = true;
+  findTodoById.isCompleted = true;
 
-  res.status(200).json(findById)
+  res.status(200).json(findTodoById)
   
 })
 
