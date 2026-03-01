@@ -20,7 +20,6 @@
   "homepage": "https://github.com/kavinoq-Academy/Divine-Assignment#readme",
   "dependencies": {
     "axios": "^1.13.2",
-    "git": "^0.1.5",
     "prompt-sync": "^4.2.0"
   }
 }
