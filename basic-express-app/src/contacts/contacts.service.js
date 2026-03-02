@@ -29,6 +29,7 @@ export class ContactsService {
             return contact;
         });
 
+
         try {
             await this.contactRepository.createNewContact(contacts);
 
