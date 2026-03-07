@@ -1,8 +1,8 @@
 import { Validator } from "../utils/validator.js";
 import {UserDataValidator} from "./dto/user.dto.js";
-import {UserBadRequestException} from "./exceptions/user.badrequest.js";
-import {UserConflictException} from "./exceptions/user.conflict.js";
-import {UserServerException} from "./exceptions/user.servererror.js";
+import {BadRequestException} from "../exceptions/badrequest.exception.js";
+import {ConflictException} from "../exceptions/conflict.exception.js";
+import {ServerException} from "../exceptions/server.exception.js";
 
 export class UserService {
     constructor(userRepository, contactService, passwordService) {
@@ -19,17 +19,17 @@ export class UserService {
         const { error } = UserDataValidator.validateNewUser(user);
         
         if (error) {
-            throw new UserBadRequestException(Validator.joiValidationErrorToString(error));
+            throw new BadRequestException(Validator.joiValidationErrorToString(error));
         }
 
         // Phone number and email verification for uniqueness.
         let existingUserContact = await this.contactService.findByPhone(user.contacts[0].phone_number);
         if (existingUserContact) {
-            throw new UserConflictException("Phone number already exists");
+            throw new ConflictException("Phone number already exists");
         }
         existingUserContact = await this.contactService.findByEmail(user.contacts[0].email);
         if (existingUserContact) {
-            throw new UserConflictException("Email already exists");
+            throw new ConflictException("Email already exists");
         }
 
         // Pull out contacts to save separately
@@ -65,7 +65,7 @@ export class UserService {
         } catch (error) {
             this.userRepository.deleteUser(createdUser.id);
 
-            throw new UserServerException("User creation failed: " + error.message + "\n" + error);
+            throw new ServerException("User creation failed: " + error.message + "\n" + error);
         }
 
         // Return the new user details.
@@ -76,11 +76,11 @@ export class UserService {
         return await this.userRepository.findById(id);
     }
 
-    async getAllUsers() {
+    async getAllUsers(queryFilter = {}) {
         try {
-            return await this.userRepository.getAllUsers();
+            return await this.userRepository.getAllUsers(queryFilter);
         } catch (error) {
-            throw new UserServerException("Failed to retrieve users: " + error.message);
+            throw new ServerException("Failed to retrieve users: " + error.message);
         }
     }
 

@@ -38,7 +38,15 @@ router.post('/', async (req, res) => {
 
 router.get('/', async (req, res) => {
     try {
-        const users = await userService.getAllUsers();
+        const page = Number.parseInt(req.query.page) || 1;
+        const limit = Number.parseInt(req.query.limit) || 10;
+        const role = req.query.role || '';
+        const status = req.query.status || '';
+        const search = req.query.search || '';
+
+        const queryParams = { page, limit, role, status, search };
+
+        const users = await userService.getAllUsers(queryParams);
 
         return res.status(200).json(new HttpResponse(users));
     } catch (error) {

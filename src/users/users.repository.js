@@ -1,9 +1,10 @@
-import { Identifier } from '../utils/identifier.js';
+import {Identifier} from '../utils/identifier.js';
+import {Pagination} from "../utils/pagination.js";
 
 export class UsersRepository {
-  constructor(userDB = []) {
-    this.users = userDB;
-  }
+    constructor(userDB = []) {
+        this.users = userDB;
+    }
 
     async findByEmail(email) {
         return this.users.find(user => user.email === email) || null;
@@ -29,8 +30,26 @@ export class UsersRepository {
         return this.users.find(user => user.id === id) || null;
     }
 
-    async getAllUsers() {
-        return this.users;
+    async getAllUsers(queryFilter = {}) {
+        let {page, limit, role, status, search} = queryFilter;
+        let queryResults = this.users;
+
+        if (role) {
+            queryResults = queryResults.filter(user => user.role === role);
+        }
+        if (status) {
+            queryResults = queryResults.filter(user => user.status === status);
+        }
+        if (search) {
+            queryResults = queryResults.filter(
+                user =>
+                    user.first_name.toLowerCase().includes(search.toLowerCase()) ||
+                    user.last_name.toLowerCase().includes(search.toLowerCase()) ||
+                    user.username.toLowerCase().includes(search.toLowerCase())
+            );
+        }
+
+        return new Pagination(page, limit, queryResults, 'users').paginate()
     }
 
     async updateUser(id, updatedFields) {
@@ -42,11 +61,11 @@ export class UsersRepository {
         // Update the updatedAt timestamp
         updatedFields.updated_at = new Date().toISOString();
 
-        this.users[userIndex] = { ...this.users[userIndex], ...updatedFields };
+        this.users[userIndex] = {...this.users[userIndex], ...updatedFields};
         return this.users[userIndex];
     }
-    
-    async deleteUser(id) { 
+
+    async deleteUser(id) {
         const userIndex = this.users.findIndex(user => user.id === id);
         if (userIndex === -1) {
             return false;

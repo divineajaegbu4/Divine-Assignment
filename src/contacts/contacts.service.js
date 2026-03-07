@@ -1,5 +1,5 @@
 import {Identifier} from "../utils/identifier.js";
-import {UserServerException} from "../users/exceptions/user.servererror.js";
+import {ServerException} from "../exceptions/server.exception.js";
 
 export class ContactsService {
     constructor(contactRepository, addressService) {
@@ -23,7 +23,7 @@ export class ContactsService {
                     contactsWithAddressList.push({...contact, address: newAddress});
                 })
                 .catch(error => {
-                    throw new UserServerException("Address creation error: " + error.message);
+                    throw new ServerException("Address creation error: " + error.message);
                 });
 
             return contact;
@@ -38,7 +38,7 @@ export class ContactsService {
                 this.addressService.delete(contact.address_id);
             });
 
-            throw new UserServerException("Failed to create contact: " + error.message);
+            throw new ServerException("Failed to create contact: " + error.message);
         }
     }
 
