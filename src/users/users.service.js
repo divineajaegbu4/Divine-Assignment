@@ -3,6 +3,7 @@ import {UserDataValidator} from "./dto/user.dto.js";
 import {BadRequestException} from "../exceptions/badrequest.exception.js";
 import {ConflictException} from "../exceptions/conflict.exception.js";
 import {ServerException} from "../exceptions/server.exception.js";
+import {NotFoundException} from "../exceptions/notfound.exception.js";
 
 export class UserService {
     constructor(userRepository, contactService, passwordService) {
@@ -73,7 +74,12 @@ export class UserService {
     }
 
     async findById(id) {
-        return await this.userRepository.findById(id);
+        const user = await this.userRepository.findById(id);
+        if (!user) {
+            throw new NotFoundException(`User not found. Invalid user id: ${id}`);
+        }
+
+        return user;
     }
 
     async getAllUsers(queryFilter = {}) {

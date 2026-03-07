@@ -52,7 +52,18 @@ router.get('/', async (req, res) => {
     } catch (error) {
         return res.status(error.code).json(new HttpResponse(null, 'data', 'Error', error.message));
     }
-})
+});
+
+router.get('/:id', async (req, res) => {
+    const id = req.params.id;
+
+    try {
+        const user = await userService.findById(id);
+        return res.status(200).json(new HttpResponse(user));
+    } catch (error) {
+        return res.status(error.code).json(new HttpResponse(null, 'data', 'Error', error.message));
+    }
+});
 
 
 export default router;
