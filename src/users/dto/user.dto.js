@@ -111,7 +111,6 @@ export class UserDataValidator {
                 .min(3)
                 .max(30),
             date_of_birth: Joi.date()
-                .iso()
                 .min('2008-01-01'), // User must be at least 18 years old
             marital_status: Joi.string()
                 .valid('single', 'married', 'divorced', 'widowed')

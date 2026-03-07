@@ -1,4 +1,4 @@
-import { Validator } from "../utils/validator.js";
+import {Validator} from "../utils/validator.js";
 import {UserDataValidator} from "./dto/user.dto.js";
 import {BadRequestException} from "../exceptions/badrequest.exception.js";
 import {ConflictException} from "../exceptions/conflict.exception.js";
@@ -17,8 +17,8 @@ export class UserService {
     }
 
     async createUser(user) {
-        const { error } = UserDataValidator.validateNewUser(user);
-        
+        const {error} = UserDataValidator.validateNewUser(user);
+
         if (error) {
             throw new BadRequestException(Validator.joiValidationErrorToString(error));
         }
@@ -47,9 +47,7 @@ export class UserService {
         user.role = "user";
 
         // Save the user's data.
-        const createdUser = await this.userRepository.createUser(user);
-
-        console.log({createdUser})
+        const createdUser = structuredClone(await this.userRepository.createUser(user));
 
         // Delete user's password from the response.
         delete createdUser.password;
@@ -74,32 +72,54 @@ export class UserService {
     }
 
     async findById(id) {
-        const user = await this.userRepository.findById(id);
+        const user = structuredClone(await this.userRepository.findById(id));
         if (!user) {
             throw new NotFoundException(`User not found. Invalid user id: ${id}`);
         }
+
+        delete user.password;
 
         return user;
     }
 
     async getAllUsers(queryFilter = {}) {
         try {
-            return await this.userRepository.getAllUsers(queryFilter);
+            let response = structuredClone(await this.userRepository.getAllUsers(queryFilter));
+
+            response.users = response.users.map(user => {
+                delete user.password;
+                return user;
+            });
+
+            return response;
         } catch (error) {
             throw new ServerException("Failed to retrieve users: " + error.message);
         }
     }
 
     async updateUser(id, updatedFields) {
-            const { error } = UserDataValidator.validateUpdateUser(updatedFields);
-            if (error) {
-                throw new Error(Validator.joiValidationErrorToString(error));
-            }
-            
-        return await this.userRepository.updateUser(id, updatedFields);
+        const {error} = UserDataValidator.validateUpdateUser(updatedFields);
+        if (error) {
+            throw new BadRequestException(Validator.joiValidationErrorToString(error));
+        }
+
+        if (updatedFields.password) {
+            updatedFields.password = await this.passwordService.hash(updatedFields.password);
+        }
+
+        const updatedUser = structuredClone(await this.userRepository.updateUser(id, updatedFields));
+        if (!updatedUser) {
+            throw new NotFoundException(`User Update failed. Invalid user id: ${id}`);
+        }
+
+        delete updatedUser.password;
+        return updatedUser;
     }
 
     async deleteUser(id) {
-        return await this.userRepository.deleteUser(id);
+        const isUserDeleted = await this.userRepository.deleteUser(id);
+        if (!isUserDeleted) {
+            throw new NotFoundException(`User deletion failed. Invalid user id: ${id}`);
+        }
     }
 }

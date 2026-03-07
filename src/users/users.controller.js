@@ -32,7 +32,9 @@ router.post('/', async (req, res) => {
 
         return res.status(201).json(new HttpResponse(newlyCreatedUser));
     } catch (error) {
-        return res.status(error.code).json(new HttpResponse(null, 'data', 'Error', error.message));
+        return res
+            .status(error.code)
+            .json(new HttpResponse(null, 'data', 'Error', error.message));
     }
 });
 
@@ -50,20 +52,50 @@ router.get('/', async (req, res) => {
 
         return res.status(200).json(new HttpResponse(users));
     } catch (error) {
-        return res.status(error.code).json(new HttpResponse(null, 'data', 'Error', error.message));
+        return res
+            .status(error.code)
+            .json(new HttpResponse(null, 'data', 'Error', error.message));
     }
 });
 
 router.get('/:id', async (req, res) => {
-    const id = req.params.id;
+    const { id }= req.params;
 
     try {
         const user = await userService.findById(id);
         return res.status(200).json(new HttpResponse(user));
     } catch (error) {
-        return res.status(error.code).json(new HttpResponse(null, 'data', 'Error', error.message));
+        return res
+            .status(error.code)
+            .json(new HttpResponse(null, 'data', 'Error', error.message));
     }
 });
+
+router.put('/:id', async (req, res) => {
+    const { id } = req.params;
+    const { body: updateData} = req;
+
+    try {
+        const updatedUser = await userService.updateUser(id, updateData);
+        return res.status(200).json(new HttpResponse(updatedUser));
+    } catch (error) {
+        return res
+            .status(error.code)
+            .json(new HttpResponse(null, 'data', 'Error', error.message));
+    }
+});
+
+router.delete('/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        await userService.deleteUser(id);
+        return res.status(204).send();
+    } catch (error) {
+        return res
+            .status(error.code)
+            .json(new HttpResponse(null, 'data', 'Error', error.message));
+    }
+})
 
 
 export default router;
