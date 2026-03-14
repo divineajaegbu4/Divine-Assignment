@@ -49,4 +49,17 @@ export class ContactsService {
     async findByEmail(email) {
         return this.contactRepository.findByEmail(email);
     }
+
+    async findByUserId(userID) {
+        let userContacts = await this.contactRepository.findByUserId(userID);
+
+        userContacts = userContacts.map(async (contact) => {
+            contact.address = await this.addressService.findById(contact.address_id);
+            delete contact.address_id;
+
+            return await contact;
+        });
+
+        return await Promise.all(userContacts);
+    }
 }

@@ -22,6 +22,10 @@ export class ContactsRepository {
         return contacts;
     }
 
+    async findByUserId(userID) {
+        return this.contacts.filter(contact => contact.user_id === userID);
+    }
+
     async updateContact(id, updatedFields) {
         const contactIndex = this.contacts.findIndex(contact => contact.id === id);
         if (contactIndex === -1) {

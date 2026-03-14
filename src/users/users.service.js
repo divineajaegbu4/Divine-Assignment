@@ -82,6 +82,20 @@ export class UserService {
         return user;
     }
 
+    async getUserContacts(userID) {
+        try {
+            const userContacts = await this.contactService.findByUserId(userID);
+
+            if (!userContacts || userContacts.length === 0) {
+                throw new NotFoundException(`User contacts not found. Invalid user id: ${userID} or no contacts found`);
+            }
+
+            return userContacts;
+        } catch (error) {
+            throw new ServerException("Failed to retrieve user contacts: " + error.message);
+        }
+    }
+
     async getAllUsers(queryFilter = {}) {
         try {
             let response = structuredClone(await this.userRepository.getAllUsers(queryFilter));

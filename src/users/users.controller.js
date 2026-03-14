@@ -95,7 +95,19 @@ router.delete('/:id', async (req, res) => {
             .status(error.code)
             .json(new HttpResponse(null, 'data', 'Error', error.message));
     }
-})
+});
+
+router.get('/:userID/contacts', async (req, res) => {
+    const {userID} = req.params;
+    try {
+        const userContacts = await userService.getUserContacts(userID);
+        return res.status(200).json(new HttpResponse(userContacts));
+    } catch (error) {
+        return res
+            .status(error.code)
+            .json(new HttpResponse(null, 'data', 'Error', error.message));
+    }
+});
 
 
 export default router;
