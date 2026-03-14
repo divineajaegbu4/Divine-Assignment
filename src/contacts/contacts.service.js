@@ -74,6 +74,24 @@ export class ContactsService {
         return contact;
     }
 
+    async getAllContacts(queryFilter = {}) {
+        try {
+            const contactResponse = await this.contactRepository.getAllContacts(queryFilter);
+            const contacts = contactResponse.contacts.map(async (contact) => {
+                contact = structuredClone(contact);
+                contact.address = await this.addressService.findById(contact.address_id);
+                delete contact.address_id;
+                return contact;
+            });
+
+            contactResponse.contacts = await Promise.all(contacts);
+
+            return await contactResponse;
+        } catch (error) {
+            throw new ServerException("Failed to retrieve contacts: " + error.message);
+        }
+    }
+
     async updateContact(id, updatedFields) {
         const {error} = ContactDataValidator.validateNewUser(updatedFields);
 

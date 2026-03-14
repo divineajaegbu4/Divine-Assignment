@@ -1,4 +1,5 @@
 import {Identifier} from "../utils/identifier.js";
+import {Pagination} from "../utils/pagination.js";
 
 export class ContactsRepository {
     constructor(contactDB = []) {
@@ -28,6 +29,21 @@ export class ContactsRepository {
 
     async findByUserId(userID) {
         return this.contacts.filter(contact => contact.user_id === userID);
+    }
+
+    async getAllContacts(queryFilter = {}) {
+        let {page, limit, search} = queryFilter;
+        let queryResults = this.contacts;
+
+        if (search) {
+            queryResults = queryResults.filter(
+                contact =>
+                    contact.phone_number.toLowerCase().includes(search.toLowerCase()) ||
+                    contact.email.toLowerCase().includes(search.toLowerCase())
+            );
+        }
+
+        return new Pagination(page, limit, queryResults, 'contacts').paginate()
     }
 
     async updateContact(id, updatedFields) {
