@@ -109,5 +109,21 @@ router.get('/:userID/contacts', async (req, res) => {
     }
 });
 
+router.put('/:userID/contacts/:contactID', async (req, res) => {
+    const {userID, contactID} = req.params;
+    const updatedFields = req.body;
+
+    // Todo: ensure that users update their own contacts only.
+
+    try {
+        const updatedContact = await userService.updateUserContact(contactID, updatedFields);
+        return res.status(200).json(new HttpResponse(updatedContact));
+    } catch (error) {
+        return res
+            .status(error.code)
+            .json(new HttpResponse(null, 'data', 'Error', error.message));
+    }
+})
+
 
 export default router;

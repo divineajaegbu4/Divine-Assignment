@@ -96,6 +96,10 @@ export class UserService {
         }
     }
 
+    async updateUserContact(contactID, updatedFields) {
+        return this.contactService.updateContact(contactID, updatedFields);
+    }
+
     async getAllUsers(queryFilter = {}) {
         try {
             let response = structuredClone(await this.userRepository.getAllUsers(queryFilter));
