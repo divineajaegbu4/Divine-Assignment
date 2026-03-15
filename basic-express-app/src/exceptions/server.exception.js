@@ -1,7 +1,7 @@
-export class UserConflictException extends Error {
+export class ServerException extends Error {
     constructor(message) {
         super(message);
-        this.statusCode = 409;
+        this.statusCode = 500;
     }
 
     get code() {

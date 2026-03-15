@@ -1,9 +1,8 @@
 import { Router } from 'express';
 import {UserService} from "./users.service.js";
-import userDB from '../data/userdb.json' assert { type: 'json' };
-import contactDB from '../data/contactdb.json' assert { type: 'json' };
-import addressDB from '../data/addressdb.json' assert { type: 'json' };
-import todoDB from '../data/tododb.json' assert {type: 'json'};
+import userDB from '../data/userdb.json' with { type: 'json' };
+import contactDB from '../data/contactdb.json' with { type: 'json' };
+import addressDB from '../data/addressdb.json' with { type: 'json' };
 import {UsersRepository} from "./users.repository.js";
 import {ContactsService} from "../contacts/contacts.service.js";
 import {ContactsRepository} from "../contacts/contacts.repository.js";
@@ -11,8 +10,6 @@ import {AddressRepository} from "../address/address.repository.js";
 import {AddressService} from "../address/address.service.js";
 import {Password} from "../security/password.js";
 import {HttpResponse} from "../http/http.response.js";
-import { TodosRespository } from '../todos/todo.repository.js';
-import { TodoService } from '../todos/todo.service.js';
 
 const router = Router();
 
@@ -22,13 +19,10 @@ const addressService = new AddressService(addressRepository);
 const contactRepository = new ContactsRepository(contactDB);
 const contactService = new ContactsService(contactRepository, addressService);
 
-const todoRespository = new TodosRespository(todoDB);
-const todoService = new TodoService(todoRespository)
-
 const passwordService = new Password();
 
 const userRepository = new UsersRepository(userDB);
-const userService = new UserService(userRepository, contactService, todoService, passwordService);
+const userService = new UserService(userRepository, contactService, passwordService);
 
 router.post('/', async (req, res) => {
     const newUserData = req.body;
@@ -38,17 +32,96 @@ router.post('/', async (req, res) => {
 
         return res.status(201).json(new HttpResponse(newlyCreatedUser));
     } catch (error) {
-        return res.status(error.code).json(new HttpResponse(null, 'data', 'Error', error.message));
+        return res
+            .status(error.code)
+            .json(new HttpResponse(null, 'data', 'Error', error.message));
     }
 });
 
 router.get('/', async (req, res) => {
     try {
-        const users = await userService.getAllUsers();
+        const page = Number.parseInt(req.query.page) || 1;
+        const limit = Number.parseInt(req.query.limit) || 10;
+        const role = req.query.role || '';
+        const status = req.query.status || '';
+        const search = req.query.search || '';
+
+        const queryParams = { page, limit, role, status, search };
+
+        const users = await userService.getAllUsers(queryParams);
 
         return res.status(200).json(new HttpResponse(users));
     } catch (error) {
-        return res.status(error.code).json(new HttpResponse(null, 'data', 'Error', error.message));
+        return res
+            .status(error.code)
+            .json(new HttpResponse(null, 'data', 'Error', error.message));
+    }
+});
+
+router.get('/:id', async (req, res) => {
+    const { id }= req.params;
+
+    try {
+        const user = await userService.findById(id);
+        return res.status(200).json(new HttpResponse(user));
+    } catch (error) {
+        return res
+            .status(error.code)
+            .json(new HttpResponse(null, 'data', 'Error', error.message));
+    }
+});
+
+router.put('/:id', async (req, res) => {
+    const { id } = req.params;
+    const { body: updateData} = req;
+
+    try {
+        const updatedUser = await userService.updateUser(id, updateData);
+        return res.status(200).json(new HttpResponse(updatedUser));
+    } catch (error) {
+        return res
+            .status(error.code)
+            .json(new HttpResponse(null, 'data', 'Error', error.message));
+    }
+});
+
+router.delete('/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        await userService.deleteUser(id);
+        return res.status(204).send();
+    } catch (error) {
+        return res
+            .status(error.code)
+            .json(new HttpResponse(null, 'data', 'Error', error.message));
+    }
+});
+
+router.get('/:userID/contacts', async (req, res) => {
+    const {userID} = req.params;
+    try {
+        const userContacts = await userService.getUserContacts(userID);
+        return res.status(200).json(new HttpResponse(userContacts));
+    } catch (error) {
+        return res
+            .status(error.code)
+            .json(new HttpResponse(null, 'data', 'Error', error.message));
+    }
+});
+
+router.put('/:userID/contacts/:contactID', async (req, res) => {
+    const {userID, contactID} = req.params;
+    const updatedFields = req.body;
+
+    // Todo: ensure that users update their own contacts only.
+
+    try {
+        const updatedContact = await userService.updateUserContact(contactID, updatedFields);
+        return res.status(200).json(new HttpResponse(updatedContact));
+    } catch (error) {
+        return res
+            .status(error.code)
+            .json(new HttpResponse(null, 'data', 'Error', error.message));
     }
 })
 

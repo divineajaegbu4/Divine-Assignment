@@ -1,7 +1,7 @@
-export class UserNotFoundException extends Error {
+export class ConflictException extends Error {
     constructor(message) {
         super(message);
-        this.statusCode = 404;
+        this.statusCode = 409;
     }
 
     get code() {

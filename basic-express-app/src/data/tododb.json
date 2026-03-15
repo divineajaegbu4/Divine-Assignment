@@ -1,1 +1,9 @@
-[]
+[{
+    "id": "b1a2c3d4-e5f6-7g8h-9i0j-k1l2m3n4o5p6",
+    "name": "Learn Node.js",
+    "description": "Learn the basics of Node.js",
+    "due_date": "2023-07-15",
+    "priority": "high",
+    "status": "pending",
+    "user_id": "0df5e8c2-3b6a-4f1e-9f4e-2b8e4c3d5a6f"
+}]

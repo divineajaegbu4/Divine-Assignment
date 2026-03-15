@@ -1,126 +1,143 @@
-import { Validator } from "../utils/validator.js";
-import { UserDataValidator } from "./dto/user.dto.js";
-import { UserBadRequestException } from "./exceptions/user.badrequest.js";
-import { UserConflictException } from "./exceptions/user.conflict.js";
-import { UserServerException } from "./exceptions/user.servererror.js";
+import {Validator} from "../utils/validator.js";
+import {UserDataValidator} from "./dto/user.dto.js";
+import {BadRequestException} from "../exceptions/badrequest.exception.js";
+import {ConflictException} from "../exceptions/conflict.exception.js";
+import {ServerException} from "../exceptions/server.exception.js";
+import {NotFoundException} from "../exceptions/notfound.exception.js";
 
 export class UserService {
-  constructor(userRepository, contactService, todoService, passwordService) {
-    this.userRepository = userRepository;
-    this.contactService = contactService;
-    this.passwordService = passwordService;
-    this.todoService = todoService
-  }
-
-  async findByEmail(email) {
-    return this.userRepository.findByEmail(email);
-  }
-
-  async createUser(user) {
-    const { error } = UserDataValidator.validateNewUser(user);
-
-    if (error) {
-      throw new UserBadRequestException(
-        Validator.joiValidationErrorToString(error),
-      );
+    constructor(userRepository, contactService, passwordService) {
+        this.userRepository = userRepository;
+        this.contactService = contactService;
+        this.passwordService = passwordService;
     }
 
-    // Phone number and email verification for uniqueness.
-    let existingUserContact = await this.contactService.findByPhone(
-      user.contacts[0].phone_number,
-    );
-    if (existingUserContact) {
-      throw new UserConflictException("Phone number already exists");
-    }
-    existingUserContact = await this.contactService.findByEmail(
-      user.contacts[0].email,
-    );
-    if (existingUserContact) {
-      throw new UserConflictException("Email already exists");
+    async findByEmail(email) {
+        return this.userRepository.findByEmail(email);
     }
 
-    // Pull out contacts to save separately
-    let contacts = structuredClone(user.contacts);
+    async createUser(user) {
+        const {error} = UserDataValidator.validateNewUser(user);
 
-    // Pull out todos to save separately
-    let todos = structuredClone(user.todos);
-    // Remove the contacts property from the user object.
-    delete user.contacts;
+        if (error) {
+            throw new BadRequestException(Validator.joiValidationErrorToString(error));
+        }
 
-    // Remove the todos property from the user object.
-    delete user.todos;
+        // Phone number and email verification for uniqueness.
+        let existingUserContact = await this.contactService.findByPhone(user.contacts[0].phone_number);
+        if (existingUserContact) {
+            throw new ConflictException("Phone number already exists");
+        }
+        existingUserContact = await this.contactService.findByEmail(user.contacts[0].email);
+        if (existingUserContact) {
+            throw new ConflictException("Email already exists");
+        }
 
-    // Hash the user password and save only the hashed password.
-    // Never save any user's plain password for their security.
-    user.password = await this.passwordService.hash(user.password);
+        // Pull out contacts to save separately
+        let contacts = structuredClone(user.contacts);
+        // Remove the contacts property from the user object.
+        delete user.contacts;
 
-    // Set default user status and role
-    user.status = "active";
-    user.role = "user";
+        // Hash the user password and save only the hashed password.
+        // Never save any user's plain password for their security.
+        user.password = await this.passwordService.hash(user.password);
 
-    // Save the user's data.
-    const createdUser = await this.userRepository.createUser(user);
+        // Set default user status and role
+        user.status = "active";
+        user.role = "user";
 
-    console.log({ createdUser });
+        // Save the user's data.
+        const createdUser = structuredClone(await this.userRepository.createUser(user));
 
-    // Delete user's password from the response.
-    delete createdUser.password;
+        // Delete user's password from the response.
+        delete createdUser.password;
 
-    contacts = contacts.map((contact) => {
-      contact.user_id = createdUser.id;
+        contacts = contacts.map(contact => {
+            contact.user_id = createdUser.id;
 
-      return contact;
-    });
+            return contact;
+        });
 
-    todos = todos.map(todo => {
-        todo.user_id = todo.id
+        let createdContacts = [];
+        try {
+            createdContacts = await this.contactService.createNewContact(contacts);
+        } catch (error) {
+            this.userRepository.deleteUser(createdUser.id);
 
-        return todo
-    })
+            throw new ServerException("User creation failed: " + error.message + "\n" + error);
+        }
 
-    let createdContacts = [];
-
-    let createdTodos = []
-    try {
-      createdContacts = await this.contactService.createNewContact(contacts);
-
-      createdTodos =  await this.todoService.createTodos(todos)
-    } catch (error) {
-      this.userRepository.deleteUser(createdUser.id);
-
-      throw new UserServerException(
-        "User creation failed: " + error.message + "\n" + error,
-      );
+        // Return the new user details.
+        return {...createdUser, contacts: createdContacts};
     }
 
-    // Return the new user details.
-    return { ...createdUser, contacts: createdContacts, todos: createdTodos };
-  }
+    async findById(id) {
+        const user = structuredClone(await this.userRepository.findById(id));
+        if (!user) {
+            throw new NotFoundException(`User not found. Invalid user id: ${id}`);
+        }
 
-  async findById(id) {
-    return await this.userRepository.findById(id);
-  }
+        delete user.password;
 
-  async getAllUsers() {
-    try {
-      return await this.userRepository.getAllUsers();
-    } catch (error) {
-      throw new UserServerException(
-        "Failed to retrieve users: " + error.message,
-      );
-    }
-  }
-
-  async updateUser(id, updatedFields) {
-    const { error } = UserDataValidator.validateUpdateUser(updatedFields);
-    if (error) {
-      throw new Error(Validator.joiValidationErrorToString(error));
+        return user;
     }
 
-    return await this.userRepository.updateUser(id, updatedFields);
-  }
+    async getUserContacts(userID) {
+        try {
+            const userContacts = await this.contactService.findByUserId(userID);
 
-  async deleteUser(id) {
-    return await this.userRepository.deleteUser(id);
-  }
+            if (!userContacts || userContacts.length === 0) {
+                throw new NotFoundException(`User contacts not found. Invalid user id: ${userID} or no contacts found`);
+            }
+
+            return userContacts;
+        } catch (error) {
+            throw new ServerException("Failed to retrieve user contacts: " + error.message);
+        }
+    }
+
+    async updateUserContact(contactID, updatedFields) {
+        return this.contactService.updateContact(contactID, updatedFields);
+    }
+
+    async getAllUsers(queryFilter = {}) {
+        try {
+            let response = structuredClone(await this.userRepository.getAllUsers(queryFilter));
+
+            response.users = response.users.map(user => {
+                delete user.password;
+                return user;
+            });
+
+            return response;
+        } catch (error) {
+            throw new ServerException("Failed to retrieve users: " + error.message);
+        }
+    }
+
+    async updateUser(id, updatedFields) {
+        const {error} = UserDataValidator.validateUpdateUser(updatedFields);
+        if (error) {
+            throw new BadRequestException(Validator.joiValidationErrorToString(error));
+        }
+
+        if (updatedFields.password) {
+            updatedFields.password = await this.passwordService.hash(updatedFields.password);
+        }
+
+        const updatedUser = structuredClone(await this.userRepository.updateUser(id, updatedFields));
+        if (!updatedUser) {
+            throw new NotFoundException(`User Update failed. Invalid user id: ${id}`);
+        }
+
+        delete updatedUser.password;
+        return updatedUser;
+    }
+
+    async deleteUser(id) {
+        const isUserDeleted = await this.userRepository.deleteUser(id);
+        if (!isUserDeleted) {
+            throw new NotFoundException(`User deletion failed. Invalid user id: ${id}`);
+        }
+    }
 }
