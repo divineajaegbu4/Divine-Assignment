@@ -28,8 +28,7 @@ router.get('/', async (req, res) => {
 
         return res.status(200).json(new HttpResponse(contacts));
     } catch (error) {
-        return res
-            .status(error.code)
+        return res.status(error.code)
             .json(new HttpResponse(null, 'data', 'Error', error.message));
     }
 });
