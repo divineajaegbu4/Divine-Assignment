@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
   "name": "divine-assignment",
   "version": "1.0.0",
   "description": "A simple JavaScript project that demonstrates different programming concepts using multiple files.",
@@ -10,10 +11,20 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/kavinoq-Academy/Divine-Assignment.git"
+=======
+  "name": "learn-node",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js"
+>>>>>>> 2b952ac650a3fae82875ddc16dcb8c786c59e9b8
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
+<<<<<<< HEAD
   "bugs": {
     "url": "https://github.com/kavinoq-Academy/Divine-Assignment/issues"
   },
@@ -21,5 +32,14 @@
   "dependencies": {
     "axios": "^1.13.2",
     "prompt-sync": "^4.2.0"
+=======
+  "type": "module",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "express": "^5.2.1",
+    "joi": "^18.0.2",
+    "jsonwebtoken": "^9.0.3",
+    "uuid": "^13.0.0"
+>>>>>>> 2b952ac650a3fae82875ddc16dcb8c786c59e9b8
   }
 }
