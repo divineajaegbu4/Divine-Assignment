@@ -93,7 +93,7 @@ export class ContactsService {
     }
 
     async updateContact(id, updatedFields) {
-        const {error} = ContactDataValidator.validateNewUser(updatedFields);
+        const {error} = ContactDataValidator.validateUpdateContact(updatedFields);
 
         if (error) {
             throw new BadRequestException(Validator.joiValidationErrorToString(error));

@@ -13,7 +13,17 @@ export class UserService {
     }
 
     async findByEmail(email) {
-        return this.userRepository.findByEmail(email);
+        const userContacts = await this.contactService.findByEmail(email);
+        if (!userContacts) {
+            throw new NotFoundException(`User not found. Invalid email: ${email}`);
+        }
+
+        const user = structuredClone(await this.userRepository.findById(userContacts.user_id));
+        if (!user) {
+            throw new NotFoundException(`User not found`);
+        }
+
+        return user;
     }
 
     async createUser(user) {

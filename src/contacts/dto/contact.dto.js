@@ -1,9 +1,10 @@
 import Joi from 'joi';
 
 export class ContactDataValidator {
-    static validateNewUser(data) {
+    static validateUpdateContact(data) {
         const contactUpdateSchema = Joi.object({
             phone_number: Joi.string().pattern(/^[0-9]{10,15}$/),
+            email: Joi.string().email(),
             address: Joi.object({
                 street: Joi.string(),
                 city: Joi.string(),
