@@ -7,7 +7,7 @@ export class AddressService {
     }
 
     async createNewAddress(address){
-        return this.addressRepository.createNewAddress(address);
+        return await this.addressRepository.createNewAddress(address);
     }
     async updateAddress(id, address){
         try {

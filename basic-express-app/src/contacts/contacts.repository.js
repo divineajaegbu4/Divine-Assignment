@@ -28,7 +28,7 @@ export class ContactsRepository {
     }
 
     async findByUserId(userID) {
-        return this.contacts.filter(contact => contact.user_id === userID);
+        return this.contacts.find(contact => contact.user_id === userID);
     }
 
     async getAllContacts(queryFilter = {}) {

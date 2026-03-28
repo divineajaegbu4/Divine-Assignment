@@ -52,17 +52,19 @@ export class ContactsService {
 
     async findByUserId(userID) {
         let userContacts = await this.contactRepository.findByUserId(userID);
+        console.log("userContacts:", userContacts);
 
-        userContacts = userContacts.map(async (contact) => {
-            contact = structuredClone(contact);
+        // userContacts = userContacts.map(async (contact) => {
+        //     contact = structuredClone(contact);
 
-            contact.address = await this.addressService.findById(contact.address_id);
-            delete contact.address_id;
+        //     contact.address = await this.addressService.findById(contact.address_id);
+        //     delete contact.address_id;
 
-            return await contact;
-        });
+        //     return await contact;
+        // });
 
-        return await Promise.all(userContacts);
+        // return await Promise.all(userContacts);
+        return userContacts
     }
 
     async findById(id) {
@@ -128,5 +130,9 @@ export class ContactsService {
             throw new ServerException("Failed to update contact: " + error.message);
         }
 
+    }
+
+    async deleteContact(id) {
+        return await this.contactRepository.deleteContact(id)
     }
 }

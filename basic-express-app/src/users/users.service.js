@@ -6,10 +6,11 @@ import {ServerException} from "../exceptions/server.exception.js";
 import {NotFoundException} from "../exceptions/notfound.exception.js";
 
 export class UserService {
-    constructor(userRepository, contactService, passwordService) {
+    constructor(userRepository, contactService, todoService, passwordService) {
         this.userRepository = userRepository;
         this.contactService = contactService;
         this.passwordService = passwordService;
+        this.todoService = todoService
     }
 
     async findByEmail(email) {
@@ -35,6 +36,13 @@ export class UserService {
 
         // Pull out contacts to save separately
         let contacts = structuredClone(user.contacts);
+
+        // Pull out todos to save separately
+        let todos = structuredClone(user.todos)
+
+        // Remove the todos property from the user object
+        delete user.todos
+
         // Remove the contacts property from the user object.
         delete user.contacts;
 
@@ -54,13 +62,26 @@ export class UserService {
 
         contacts = contacts.map(contact => {
             contact.user_id = createdUser.id;
-
             return contact;
         });
 
+
+
+        todos = todos.map(todo => {
+            todo.user_id = createdUser.id
+            todo.status = "active"
+            console.log("todosUserId",todos);
+
+            return todo
+        })
+
+        console.log("todos", todos);
+
         let createdContacts = [];
+        let createdTodos = [];
         try {
             createdContacts = await this.contactService.createNewContact(contacts);
+            createdTodos = await this.todoService.createTodos(todos)
         } catch (error) {
             this.userRepository.deleteUser(createdUser.id);
 
@@ -68,7 +89,7 @@ export class UserService {
         }
 
         // Return the new user details.
-        return {...createdUser, contacts: createdContacts};
+        return {...createdUser, contacts: createdContacts, Todos: createdTodos};
     }
 
     async findById(id) {
@@ -96,14 +117,35 @@ export class UserService {
         }
     }
 
+    async getUserTodos(userID) {
+        try {
+          const userTodos = await this.todoService.findByUserId(userID)
+
+          console.log(userTodos);
+
+          if(!userTodos || userTodos.length === 0) {
+            throw new NotFoundException(`User todos not found. Invalid user id: ${userID}`)
+          }
+          return userTodos
+        }catch(error) {
+            throw new ServerException("Failed to retrieve user todos:" + error.message)
+        }
+    }
+
     async updateUserContact(contactID, updatedFields) {
         return this.contactService.updateContact(contactID, updatedFields);
+    }
+
+    async updateUserTodo(todoID, updatedFields) {
+        return await this.todoService.updateTodo(todoID, updatedFields)
     }
 
     async getAllUsers(queryFilter = {}) {
         try {
             let response = structuredClone(await this.userRepository.getAllUsers(queryFilter));
 
+            console.log("response:", response);
+            
             response.users = response.users.map(user => {
                 delete user.password;
                 return user;
