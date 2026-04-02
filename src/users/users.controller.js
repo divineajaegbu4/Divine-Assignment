@@ -1,13 +1,16 @@
 import { Router } from 'express';
 import {UserService} from "./users.service.js";
-import userDB from '../data/userdb.json' with { type: 'json' };
-import contactDB from '../data/contactdb.json' with { type: 'json' };
-import addressDB from '../data/addressdb.json' with { type: 'json' };
+import userDB from '../data/userdb.json' assert { type: 'json' };
+import contactDB from '../data/contactdb.json' assert { type: 'json' };
+import addressDB from '../data/addressdb.json' assert { type: 'json' };
+import todoDB from '../data/tododb.json' assert { type: 'json' };
 import {UsersRepository} from "./users.repository.js";
 import {ContactsService} from "../contacts/contacts.service.js";
 import {ContactsRepository} from "../contacts/contacts.repository.js";
 import {AddressRepository} from "../address/address.repository.js";
 import {AddressService} from "../address/address.service.js";
+import { TodoRepository } from '../todos/todo.repository.js';
+import { TodoService } from '../todos/todo.service.js';
 import {Password} from "../security/password.js";
 import {HttpResponse} from "../http/http.response.js";
 
@@ -18,6 +21,9 @@ const addressService = new AddressService(addressRepository);
 
 const contactRepository = new ContactsRepository(contactDB);
 const contactService = new ContactsService(contactRepository, addressService);
+
+const todoRepository = new TodoRepository(todoDB);
+const todoService = new TodoService(todoRepository)
 
 const passwordService = new Password();
 
@@ -124,6 +130,37 @@ router.put('/:userID/contacts/:contactID', async (req, res) => {
             .json(new HttpResponse(null, 'data', 'Error', error.message));
     }
 })
+
+router.get("/:userID/todos", async (req, res) => {
+  const { userID } = req.params;
+
+  try {
+    const userTodos = await todoService.getUserTodos(userID);
+    return res.status(200).json(new HttpResponse(userTodos));
+  } catch (error) {
+    return res
+      .status(error.code)
+      .json(new HttpResponse(null, "data", "Error", error.message));
+  }
+});
+
+router.put("/:userID/todos/:todoID", async (req, res) => {
+  const { todoID } = req.params;
+  const updatedFields = req.body;
+
+  try {
+    const updatedTodo = await todoService.updateUserTodo(todoID, updatedFields);
+
+    console.log("updatedTodo", updatedTodo);
+
+    return res.status(200).json(new HttpResponse(updatedTodo));
+  } catch (error) {
+    console.log(typeof error.code);
+    return res
+      .status(error.code)
+      .json(new HttpResponse(null, "data", "Error", error.message));
+  }
+});
 
 
 export default router;
