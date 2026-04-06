@@ -16,6 +16,8 @@ export class AuthService {
             throw new BadRequestException(`Signup failed: ${error.message}`);
         }
 
+        console.log(user);
+        
         user.auth_token = AuthToken.sign({
             id: user.id,
             role: user.role,

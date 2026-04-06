@@ -1,30 +1,42 @@
-import {ServerException} from "../exceptions/server.exception.js";
-import {BadRequestException} from "../exceptions/badrequest.exception.js";
-import {Validator} from "../utils/validator.js";
-import {TodoDataValidator} from "./dto/todo.dto.js";
+import { ServerException } from "../exceptions/server.exception.js";
+import { BadRequestException } from "../exceptions/badrequest.exception.js";
+import { Validator } from "../utils/validator.js";
+import { TodoDataValidator } from "./dto/todo.dto.js";
 
 export class TodoService {
-    constructor(todoRepository) {
-        this.todoRepository = todoRepository;
+  constructor(todoRepository, userService) {
+    this.todoRepository = todoRepository;
+    this.userService = userService;
+  }
+
+  async createTodo(todoData, userId) {
+    const { error } = TodoDataValidator.validateNewTodo(todoData);
+
+    if (error) {
+      throw new BadRequestException(
+        Validator.joiValidationErrorToString(error),
+      );
+    }
+      
+    const user = await this.userService.findById(userId);
+
+    if (!user) {
+      throw new BadRequestException(
+        `User with ID ${userId} does not exist in the database: ${error.message}`,
+      );
     }
 
-    async createTodo(todoData) {
-        const {error} = TodoDataValidator.validateNewTodo(todoData);
+    todoData.status = "pending";
+    todoData.user_id = user.id;
 
-        if (error) {
-            throw new BadRequestException(Validator.joiValidationErrorToString(error));
-        }
-
-        todoData.status = 'pending';
-
-        try {
-            return await this.todoRepository.createTodo(todoData);
-        } catch (error) {
-            throw new ServerException("Failed to create Todo: " + error.message);
-        }
+    try {
+      return await this.todoRepository.createTodo(todoData);
+    } catch (error) {
+      throw new ServerException("Failed to create Todo: " + error.message);
     }
+  }
 
-      async findById(id) {
+  async findById(id) {
     return await this.todoRepository.findById(id);
   }
 
@@ -90,4 +102,3 @@ export class TodoService {
     return deleteTodo;
   }
 }
-
