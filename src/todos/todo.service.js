@@ -54,12 +54,22 @@ export class TodoService {
     }
 
     async findById(id) {
-        const todo = this.todoRepository.findById(id);
+        const todo = await this.todoRepository.findById(id);
 
         if (!todo) {
             throw new NotFoundException("Invalid todo ID: " + id + ". Not found in the database.")
         }
 
+        return todo;
+    }
 
+    async findByUserId(userID) {
+        const todo = await this.todoRepository.findByUserId(userID);
+
+        if (!todo) {
+            throw new NotFoundException("Invalid user ID: " + userID + ". Not found in the database.")
+        }
+
+        return todo;
     }
 }

@@ -3,14 +3,20 @@ import todoDB from '../data/tododb.json' with { type: 'json' };
 import {HttpResponse} from "../http/http.response.js";
 import {TodoRepository} from "./todo.repository.js";
 import {TodoService} from "./todo.service.js";
+import TokenDecoder from "../middlewares/token.decoder.middleware.js";
+import {role} from "../middlewares/role.middleware.js";
 
 const router = Router();
+router.use(TokenDecoder());
 
 const todoRepository = new TodoRepository(todoDB);
 const todoService = new TodoService(todoRepository);
 
-router.post('/', async (req, res) => {
+router.post('/', role(["admin", "user"]), async (req, res) => {
     const newTodo = req.body;
+    const { id } = req.principal;
+
+    newTodo.user_id = id;
 
     try {
         const createdTodo = await todoService.createTodo(newTodo);
@@ -22,7 +28,7 @@ router.post('/', async (req, res) => {
     }
 });
 
-router.get('/', async (req, res) => {
+router.get('/', role(["admin"]), async (req, res) => {
     try {
         const page = Number.parseInt(req.query.page) || 1;
         const limit = Number.parseInt(req.query.limit) || 10;
@@ -30,6 +36,7 @@ router.get('/', async (req, res) => {
         const search = req.query.search || '';
         const priority = req.query.priority || '';
         const title = req.query.title || '';
+        const user_id = req.query.user_id || '';
         let due_date = req.query.due_date || '';
         let start_date = req.query.start_date || '';
         let end_date = req.query.end_date || '';
@@ -45,6 +52,7 @@ router.get('/', async (req, res) => {
         }
 
         const queryParams = {
+            user_id,
             page, limit, priority,
             title, due_date, status,
             search, start_date, end_date
@@ -60,7 +68,21 @@ router.get('/', async (req, res) => {
     }
 });
 
-router.get('/:id', async (req, res) => {
+router.get('/me', role(["admin", "user"]), async (req, res) => {
+    const { id }= req.principal;
+
+    try {
+        const todo = await todoService.findByUserId(id);
+
+        return res.status(200).json(new HttpResponse(todo));
+    } catch (error) {
+        return res
+            .status(error.code)
+            .json(new HttpResponse(null, 'data', 'Error', error.message));
+    }
+});
+
+router.get('/:id', role(["admin"]), async (req, res) => {
     const { id }= req.params;
 
     try {
@@ -74,7 +96,7 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', role(["admin", "user"]), async (req, res) => {
     const { id } = req.params;
     const { body: updateData} = req;
     try {
@@ -87,7 +109,19 @@ router.put('/:id', async (req, res) => {
     }
 });
 
-router.delete('/:id', async (req, res) => {
+router.delete('/me', role(["admin", "user"]), async (req, res) => {
+    const { id } = req.principal;
+    try {
+        await todoService.deleteTodo(id);
+        return res.status(204).send();
+    } catch (error) {
+        return res.
+        status(error.code)
+            .json(new HttpResponse(null, 'data', 'Error', error.message));
+    }
+})
+
+router.delete('/:id', role(["admin"]), async (req, res) => {
     const { id } = req.params;
     try {
         await todoService.deleteTodo(id);

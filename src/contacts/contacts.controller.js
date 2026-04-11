@@ -6,8 +6,10 @@ import {ContactsRepository} from "./contacts.repository.js";
 import {AddressRepository} from "../address/address.repository.js";
 import {AddressService} from "../address/address.service.js";
 import {HttpResponse} from "../http/http.response.js";
+import TokenDecoder from "../middlewares/token.decoder.middleware.js";
 
 const router = Router();
+router.use(TokenDecoder());
 
 const addressRepository = new AddressRepository(addressDB);
 const addressService = new AddressService(addressRepository);

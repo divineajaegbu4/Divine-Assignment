@@ -36,6 +36,10 @@ export class AuthService {
             throw new AuthenticationException("Invalid email or password");
         }
 
+        if (user.status !== "active") {
+            throw new AuthenticationException("User is not active");
+        }
+
         delete user.password;
 
         user.auth_token = AuthToken.sign({
