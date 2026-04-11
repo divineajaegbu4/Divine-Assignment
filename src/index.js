@@ -15,7 +15,7 @@ app.use("/todos", TodoController);
 app.use("/auth", AuthController);
 
 const port = 2309;
-app.listen(port, () =>
+app.listen(port, '0.0.0.0', () =>
   console.log(`Server running at http://localhost:${port}`),
 );
 
