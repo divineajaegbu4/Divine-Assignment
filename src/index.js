@@ -4,6 +4,17 @@ import ContactsController from "./contacts/contacts.controller.js";
 import TodoController from "./todos/todo.controller.js";
 import dotenv from "dotenv";
 import AuthController from "./auth/auth.controller.js";
+import { fileURLToPath } from 'node:url';
+import path from 'path';
+
+// 1. Get the full path to the current file
+const __filename = fileURLToPath(import.meta.url);
+
+// // 2. Get the directory name from that file path
+const __dirname = path.dirname(__filename);
+// const envPath = path.resolve(__dirname, '.env.sample');
+// console.log("Looking for env at:", envPath);
+dotenv.config({path: path.resolve(__dirname, "..", ".env.sample")});
 
 dotenv.config();
 

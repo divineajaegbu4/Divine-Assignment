@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import todoDB from '../data/tododb.json' with { type: 'json' };
+import todoDB from '../data/tododb.json' assert { type: 'json' };
 import {HttpResponse} from "../http/http.response.js";
 import {TodoRepository} from "./todo.repository.js";
 import {TodoService} from "./todo.service.js";

@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import {UserService} from "./users.service.js";
-import userDB from '../data/userdb.json' with { type: 'json' };
-import contactDB from '../data/contactdb.json' with { type: 'json' };
-import addressDB from '../data/addressdb.json' with { type: 'json' };
+import userDB from '../data/userdb.json' assert { type: 'json' };
+import contactDB from '../data/contactdb.json' assert { type: 'json' };
+import addressDB from '../data/addressdb.json' assert { type: 'json' };
 import {UsersRepository} from "./users.repository.js";
 import {ContactsService} from "../contacts/contacts.service.js";
 import {ContactsRepository} from "../contacts/contacts.repository.js";

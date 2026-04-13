@@ -24,6 +24,8 @@ export default function TokenDecoder() {
 
         req.principal = AuthToken.verify(token);
 
+        console.log("principal", req.principal);
+
         next();
     }
 }
